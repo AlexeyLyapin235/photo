@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <p>{{count}}</p>
     <div>
       <button @click.prevent="getUsers">
         Узнать количество зарегистрированных пользователей
@@ -12,46 +13,45 @@
       </ul>
     </div>
     <form>
-      <input v-model="findText" placeholder="Поиск по титлу "/>
+      <input v-model="findText" placeholder="Поиск по титлу " />
       <button @click.prevent="search">Go</button>
     </form>
     <form id="uploadForm " class=""></form>
-<div class="">
-    <ul class="row row-cols-1 row-cols-md-5 g-4">
-      <li lass="list-group-item " v-for="image in test3" :key="image.url">
-        <div
-          class="сard col order-last"
-          style="width: 18rem"
-          @click="sel = image"
-          :class="sel == image ? ' border border-danger' : ''"
-        >
-          <img
-            :src="
-              'http://localhost:1337' +
-              image.attributes.image.data.attributes.url
-            "
-            class="card-img-top"
-            alt=""
-          />
-          <div class="card-body">
-            <ul class="card-title">
-              <li>Титул : {{ image.attributes.message }}</li>
-            </ul>
-            <p class="card-text" @click="sel = null"></p>
-            <MyComp :coments1="coments1" :movie="coments1.id" />
+    <div class="">
+      <ul class="row row-cols-1 row-cols-md-5 g-4">
+        <li lass="list-group-item " v-for="image in photos" :key="image.url">
+          <div
+            class="сard col order-last"
+            style="width: 18rem"
+            @click="sel = image"
+            :class="sel == image ? ' border border-danger' : ''"
+          >
+            <img
+              :src="
+                'http://localhost:1337' +
+                image.attributes.image.data.attributes.url
+              "
+              class="card-img-top"
+              alt=""
+            />
+            <div class="card-body">
+              <ul class="card-title">
+                <li>Титул : {{ image.attributes.message }}</li>
+              </ul>
+              <p class="card-text" @click="sel = null"></p>
+              <MyComp :coments1="coments1" :movie="coments1.id" />
+            </div>
           </div>
-        </div>
-      </li>
-    </ul>
+        </li>
+      </ul>
     </div>
-    
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
+import api from "../lib/axios";
 
-import axios from "axios";
 import MyComp from "@/components/MyComp.vue";
 export default {
   name: "HomeView",
@@ -61,90 +61,76 @@ export default {
   },
   data() {
     return {
-      obj: [
-        {
-          url: "",
-          mes: "",
-        },
-      ],
+      myInfo: "",
       findText: "",
       users: "",
-      test3: "",
+      photos: "",
       sel: null,
       coments: "",
       coments1: "",
       count: 0,
+     
     };
   },
 
   methods: {
     historyPhoto() {
-      this.getImages().then((response) => {
-        this.test3 = response.data.data;
-        console.log(this.test3);
-        // this.obj[0].mes = respImg.map((el) => el.attributes.message);
-        // this.test2 = respImg.map((el) => el.attributes.message)
-        //console.log(this.test2);
-        //respImg.map((el) => el.attributes.image.data);
-        // respImg.map((el) => {
-        //  console.log(el.attributes.image.data.attributes);
-        //  return el.attributes.image.data
-        //   ? this.images.push(el.attributes.image.data.attributes)
-        //    : "test";
+      api.getImages().then((response) => {
+        this.photos = response.data.data;
+        console.log(this.photos);
       });
-
-      
     },
 
-    
-    getImages() {
-      return axios.get("http://localhost:1337/api/posts?populate=image");
-    },
+   addcount(value){    // Pattern chain of responsibility 
+   this.count += value;
+   return this
+   },
+
     async addMessage() {
-      return await axios
-        .post("http://localhost:1337/api/comments?populate=*", this.coments)
-        .then((response) => {
-          console.log(response);
-        });
+      return await api.addComents(this.coments).then((response) => {
+        console.log(response);
+      });
     },
     getComents() {
-      return axios
-        .get("http://localhost:1337/api/comments?populate=*")
-        .then((response) => {
-          this.coments = response.data.data;
-          console.log(response.data.data);
-          this.coments1 = this.coments.map((el) => el.attributes);
-          console.log(this.coments1);
-        });
+      return api.getComments().then((response) => {
+        this.coments = response.data.data;
+        this.coments1 = this.coments.map((el) => el.attributes);
+        console.log(this.coments1);
+      });
     },
-
+    responseAdapter(response) {
+      // паттерн адаптер
+      return response.map((entry) => ({
+        name: entry.username,
+        userEmail: entry.email,
+      }));
+    },
     getUsers() {
-      return axios.get("http://localhost:1337/api/users").then((res) => {
+      return api.getUsers().then((res) => {
         this.users = res.data;
-        console.log(this.users);
+        let adapterUsers = this.responseAdapter(this.users); // применение патерна адапрета
+        console.log(adapterUsers); // вывод патерна в консоли
       });
     },
     deleteUsers() {
-      this.users = "";
+      return (this.users = "");
     },
+
     search() {
-     this.test3 =  this.test3.filter(
+      this.photos = this.photos.filter(
         (el) => el.attributes.message == this.findText
       );
-      
     },
   },
 
   beforeMount() {
     this.historyPhoto();
     this.getComents();
+    this.addcount(10).addcount(5)
   },
 };
 </script>
 <style>
 .cardForm {
-  
-    
-
 }
 </style>

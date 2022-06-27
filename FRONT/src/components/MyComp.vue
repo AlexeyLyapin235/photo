@@ -93,9 +93,6 @@ export default {
         console.log(response);
       })
     },
-    testlocal(){
-      console.log(localStorage.getItem("token"));
-    },
     
   },
 };

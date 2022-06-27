@@ -28,36 +28,46 @@ class API {
   }
   
 
-  login(data) {
-    return this.adapter
-      .post("http://localhost:1337/api/auth/local", data)
-      .then((response) => {
-        localStorage.setItem("token", response.data.jwt);
-        console.log(localStorage.getItem("token"));
-      });
+  getComments(){
+    return  this.adapter.get("http://localhost:1337/api/comments?populate=*")
   }
-
-  register(data) {
-    return this.adapter.post(
-      "http://localhost:1337/api/auth/local/register",
-      data
-    );
+ 
+  getUsers(){
+  return this.adapter.get("http://localhost:1337/api/users")
   }
-  photos(){
-    return this.adapter.get("http://localhost:1337/api/posts?populate=image")
-  }
-  getInfoForMe(){
-    return this.adapter.get("http://localhost:1337/api/users/me")
-  }
-  addComents(data){
-  return this.adapter.post("http://localhost:1337/api/comments?populate=*",{
-    body:data,
-    headers: {
-      "Content-Type": "application / json; charset = UTF-8",
-    },
-  })
-  }
-  
-}
-
+ login(data) {
+     return this.adapter
+       .post("http://localhost:1337/api/auth/local", data)
+       .then((response) => {
+         localStorage.setItem("token", response.data.jwt);
+         console.log(localStorage.getItem("token"));
+       });
+   }
+ 
+   register(data) {
+     return this.adapter.post(
+       "http://localhost:1337/api/auth/local/register",
+       data
+     );
+   }
+   photos(){
+     return this.adapter.get("http://localhost:1337/api/posts?populate=image")
+   }
+   getImages() {
+     return this.adapter.get("http://localhost:1337/api/posts?populate=image");
+   }
+   getInfoForMe(){
+     return this.adapter.get("http://localhost:1337/api/users/me")
+   }
+   addComents(data){
+   return this.adapter.post("http://localhost:1337/api/comments?populate=*",{
+     body:data,
+     headers: {
+       "Content-Type": "application / json; charset = UTF-8",
+     }
+   
+   })
+   }
+   
+ }
 export default new API();
